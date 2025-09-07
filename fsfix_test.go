@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	fsfix "go-fsfix"
+	fsfix "github.com/mikeschinkel/go-fsfix"
 )
 
 func TestSimpleProject(t *testing.T) {
@@ -70,7 +70,6 @@ func main() {
 	// Use tf.Dir() to get root fixture path
 	// Use pf.Dir() to get test-project path
 	// Use ff.Filepath to get main.go path
-	print()
 }
 
 func TestRepoProject(t *testing.T) {
