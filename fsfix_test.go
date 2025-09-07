@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	fsfix "github.com/mikeschinkel/go-fsfix"
+	"github.com/mikeschinkel/go-fsfix"
 )
 
 func TestSimpleProject(t *testing.T) {
@@ -28,8 +28,6 @@ func main() {
 
 	// Creates all fixtures
 	tf.Create(t)
-	// Delete all test files at end of test function
-	defer tf.Cleanup()
 
 	if tf.DirPrefix != "my-test" {
 		t.Errorf("RootFixture.DirPrefix does not equal 'my-test'")
