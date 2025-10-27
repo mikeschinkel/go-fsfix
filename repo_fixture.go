@@ -3,10 +3,10 @@
 package fsfix
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/mikeschinkel/go-dt"
 )
 
 // _ is a compile-time check to ensure RepoFixture implements the Fixture interface.
@@ -28,7 +28,7 @@ type RepoFixtureArgs struct {
 }
 
 // newRepoFixture creates a new repository fixture with the specified name and arguments.
-func newRepoFixture(t *testing.T, name string, args *RepoFixtureArgs) *RepoFixture {
+func newRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
 	if args == nil {
 		args = &RepoFixtureArgs{}
 	}
@@ -45,16 +45,16 @@ func newRepoFixture(t *testing.T, name string, args *RepoFixtureArgs) *RepoFixtu
 	}
 }
 
-func (rf *RepoFixture) RelativePath() string {
-	return filepath.Join(rf.Parent.RelativePath(), rf.Name)
+func (rf *RepoFixture) RelativePath() dt.DirPath {
+	return dt.DirPathJoin(rf.Parent.RelativePath(), rf.Name)
 }
 
-func (rf *RepoFixture) GitPath() string {
-	return filepath.Join(rf.Dir(), ".git")
+func (rf *RepoFixture) GitPath() dt.DirPath {
+	return dt.DirPathJoin(rf.Dir(), ".git")
 }
 
-func (rf *RepoFixture) RelativeGitPath() string {
-	return filepath.Join(rf.RelativePath(), ".git")
+func (rf *RepoFixture) RelativeGitPath() dt.DirPath {
+	return dt.DirPathJoin(rf.RelativePath(), ".git")
 }
 
 // ensureCreated forces a failure if called before Create() is called.
@@ -73,21 +73,21 @@ func (rf *RepoFixture) createWithParent(t *testing.T, parent Fixture) {
 
 	// Create .git directory to simulate making it a valid repo
 	// TODO: Maybe we could shell out to `git init` here if anyone ever needs that
-	gitDir := filepath.Join(rf.dir, ".git")
-	err := os.MkdirAll(gitDir, 0755)
+	gitDir := dt.DirPathJoin(rf.dir, ".git")
+	err := dt.MkdirAll(gitDir, 0755)
 	if err != nil {
 		t.Errorf("Failed to create .git directory within %s; %v", rf.dir, err)
 	}
 }
 
 // MakeDir creates a path relative to this repository fixture.
-func (rf *RepoFixture) MakeDir(fp string) string {
+func (rf *RepoFixture) MakeDir(fp string) dt.DirPath {
 	rf.ensureCreated()
-	return filepath.Join(rf.dir, fp)
+	return dt.DirPathJoin(rf.dir, fp)
 }
 
 // AddRepoFixture adds a sub-repository fixture to this repository fixture.
-func (rf *RepoFixture) AddRepoFixture(t *testing.T, name string, args *RepoFixtureArgs) *RepoFixture {
+func (rf *RepoFixture) AddRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
 	child := newRepoFixture(t, name, args)
 	child.Parent = rf
 	rf.ChildFixtures = append(rf.ChildFixtures, child)
@@ -95,7 +95,7 @@ func (rf *RepoFixture) AddRepoFixture(t *testing.T, name string, args *RepoFixtu
 }
 
 // AddDirFixture adds a directory fixture to this repository fixture.
-func (rf *RepoFixture) AddDirFixture(t *testing.T, name string, args *DirFixtureArgs) *DirFixture {
+func (rf *RepoFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
 	child := newDirFixture(t, name, args)
 	child.Parent = rf
 	rf.ChildFixtures = append(rf.ChildFixtures, child)
@@ -103,7 +103,7 @@ func (rf *RepoFixture) AddDirFixture(t *testing.T, name string, args *DirFixture
 }
 
 // AddFileFixture adds a file fixture to a project fixture
-func (rf *RepoFixture) AddFileFixture(t *testing.T, name string, args *FileFixtureArgs) *FileFixture {
+func (rf *RepoFixture) AddFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
 	child := newFileFixture(t, name, args)
 	child.Parent = rf
 	rf.FileFixtures = append(rf.FileFixtures, child)
@@ -117,7 +117,7 @@ func (rf *RepoFixture) AddFileFixture(t *testing.T, name string, args *FileFixtu
 func (rf *RepoFixture) AddFileFixtures(t *testing.T, defaults *FileFixtureArgs, args ...any) {
 	for _, f := range args {
 		switch ffa := f.(type) {
-		case string:
+		case dt.RelFilepath:
 			rf.AddFileFixture(t, ffa, defaults)
 		case *FileFixtureArgs:
 			if ffa.Name == "" {

@@ -3,9 +3,9 @@ package fsfix_test
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 
+	"github.com/mikeschinkel/go-dt"
 	"github.com/mikeschinkel/go-fsfix"
 )
 
@@ -49,16 +49,16 @@ func main() {
 		t.Errorf("FileFixture.Filepath not set")
 	}
 
-	got := filepath.Base(ff.Filepath)
-	want := "main.go"
-	if got != want {
-		t.Errorf("FileFixture.Filepath not set to '%s'; got '%s' instead", want, got)
+	gotFP := dt.FileBase(ff.Filepath)
+	wantFP := dt.Filename("main.go")
+	if gotFP != wantFP {
+		t.Errorf("FileFixture.Filepath not set to '%s'; got '%s' instead", wantFP, gotFP)
 	}
 
-	got = filepath.Base(filepath.Dir(ff.Filepath))
-	want = "test-project"
-	if got != want {
-		t.Errorf("FileFixture.Filepath's parent dir not set to '%s'; got '%s' instead", want, got)
+	gotDP := dt.DirBase(dt.Dir(ff.Filepath))
+	wantDP := dt.PathSegments("test-project")
+	if gotDP != wantDP {
+		t.Errorf("FileFixture.Filepath's parent dir not set to '%s'; got '%s' instead", wantDP, gotDP)
 	}
 
 	if !fileExists(t, ff.Filepath) {
@@ -82,10 +82,10 @@ func TestRepoProject(t *testing.T) {
 	// Delete all test files at end of test function
 	defer tf.Cleanup()
 
-	want := "my-repo/.git"
-	got := rf.RelativeGitPath()
-	if want != got {
-		t.Errorf("FileFixture.Filepath doesn't contain '%s'; got '%s' instead", got, want)
+	wantDP := dt.DirPath("my-repo/.git")
+	gotDP := rf.RelativeGitPath()
+	if wantDP != gotDP {
+		t.Errorf("FileFixture.Filepath doesn't contain '%s'; got '%s' instead", gotDP, wantDP)
 	}
 	// Use rf.GitPath() to get the .git path
 }
@@ -105,7 +105,7 @@ func TestDynamicContent(t *testing.T) {
 
 	ffs := make([]*fsfix.FileFixture, 3)
 	for i := range 3 {
-		file := fmt.Sprintf("file-%d.txt", i+1)
+		file := dt.RelFilepath(fmt.Sprintf("file-%d.txt", i+1))
 		// Add typical project files
 		ffs[i] = df.AddFileFixture(t, file, &fsfix.FileFixtureArgs{
 			ContentFunc: myContentFunc(i + 1),
@@ -118,7 +118,7 @@ func TestDynamicContent(t *testing.T) {
 	defer tf.Cleanup()
 
 	want := "Text File #2\n"
-	gotBB, _ := os.ReadFile(ffs[1].Filepath)
+	gotBB, _ := dt.ReadFile(ffs[1].Filepath)
 	if want != string(gotBB) {
 		t.Errorf("FileFixture.Filepath doesn't contain '%s'; got '%s' instead", string(gotBB), want)
 	}
@@ -154,15 +154,15 @@ func TestComplexProject(t *testing.T) {
 	defer tf.Cleanup()
 
 	want := `{"test": true}`
-	gotBB, _ := os.ReadFile(tjf.Filepath)
+	gotBB, _ := dt.ReadFile(tjf.Filepath)
 	if want != string(gotBB) {
 		t.Errorf("FileFixture.Fileoath doesn't contain '%s'; got '%s' instead", string(gotBB), want)
 	}
 
-	want = "internal/widgets"
-	got := df2.RelativePath()
-	if want != got {
-		t.Errorf("DirFixture.RelativePath() doesn't contain '%s'; got '%s' instead", got, want)
+	wantDP := dt.DirPath("internal/widgets")
+	gotDP := df2.RelativePath()
+	if wantDP != gotDP {
+		t.Errorf("DirFixture.RelativePath() doesn't contain '%s'; got '%s' instead", gotDP, wantDP)
 	}
 
 	if fileExists(t, mwf.Filepath) {
@@ -184,14 +184,14 @@ type MyWidget struct{
 `
 }
 
-func dirExists(t *testing.T, path string) bool {
+func dirExists(t *testing.T, dp dt.DirPath) bool {
 	t.Helper()
-	info, err := os.Stat(path)
+	info, err := dt.StatDir(dp)
 	return !os.IsNotExist(err) && info.IsDir()
 }
 
-func fileExists(t *testing.T, path string) bool {
+func fileExists(t *testing.T, path dt.Filepath) bool {
 	t.Helper()
-	info, err := os.Stat(path)
+	info, err := dt.StatFile(path)
 	return !os.IsNotExist(err) && !info.IsDir()
 }

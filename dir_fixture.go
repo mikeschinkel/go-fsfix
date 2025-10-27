@@ -4,9 +4,10 @@ package fsfix
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/mikeschinkel/go-dt"
 )
 
 // _ is a compile-time check to ensure DirFixture implements the Fixture interface.
@@ -14,19 +15,19 @@ var _ Fixture = (*DirFixture)(nil)
 
 // DirFixture represents a dir directory fixture with optional Git repository.
 type DirFixture struct {
-	Name          string         // Name of the dir directory
-	FileFixtures  []*FileFixture // Files to create within this dir
-	ChildFixtures []Fixture      // Subdirectories or Projects to create within this dir
-	ModifiedTime  time.Time      // Modification time for the dir directory
-	Permissions   int            // Directory permissions (e.g., 0755)
-	dir           string         // Full path to the created directory
-	Parent        Fixture        // Parent test fixture
+	Name          dt.PathSegments // Name of the dir directory
+	FileFixtures  []*FileFixture  // Files to create within this dir
+	ChildFixtures []Fixture       // Subdirectories or Projects to create within this dir
+	ModifiedTime  time.Time       // Modification time for the dir directory
+	Permissions   int             // Directory permissions (e.g., 0755)
+	dir           dt.DirPath      // Full path to the created directory
+	Parent        Fixture         // Parent test fixture
 	created       bool
 	t             *testing.T
 }
 
-func (df *DirFixture) RelativePath() string {
-	return filepath.Join(df.Parent.RelativePath(), df.Name)
+func (df *DirFixture) RelativePath() dt.DirPath {
+	return dt.DirPathJoin(df.Parent.RelativePath(), df.Name)
 }
 
 // ensureCreated forces a failure if called before Create() is called.
@@ -38,7 +39,7 @@ func (df *DirFixture) ensureCreated() {
 }
 
 // Dir returns the full path to the directory fixture.
-func (df *DirFixture) Dir() string {
+func (df *DirFixture) Dir() dt.DirPath {
 	df.ensureCreated()
 	return df.dir
 }
@@ -52,7 +53,7 @@ type DirFixtureArgs struct {
 }
 
 // newDirFixture creates a new directory fixture with the specified name and arguments.
-func newDirFixture(t *testing.T, name string, args *DirFixtureArgs) *DirFixture {
+func newDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
 	if args == nil {
 		args = &DirFixtureArgs{}
 	}
@@ -70,9 +71,9 @@ func newDirFixture(t *testing.T, name string, args *DirFixtureArgs) *DirFixture 
 }
 
 // MakeDir creates a path relative to this directory fixture.
-func (df *DirFixture) MakeDir(fp string) string {
+func (df *DirFixture) MakeDir(fp string) dt.DirPath {
 	df.ensureCreated()
-	return filepath.Join(df.dir, fp)
+	return dt.DirPathJoin(df.dir, fp)
 }
 
 // CreateWithParent creates the directory structure and files for this fixture with the specified parent.
@@ -81,11 +82,11 @@ func (df *DirFixture) createWithParent(t *testing.T, pf Fixture) {
 	df.created = true
 
 	// Create a single dir directory with .git
-	df.dir = filepath.Join(pf.Dir(), df.Name)
+	df.dir = dt.DirPathJoin(pf.Dir(), df.Name)
 	if df.Permissions == 0 {
 		t.Errorf("File permissions not set for %s", df.dir)
 	}
-	err := os.MkdirAll(df.dir, os.FileMode(df.Permissions))
+	err := dt.MkdirAll(df.dir, os.FileMode(df.Permissions))
 	if err != nil {
 		t.Errorf("Failed to create testing directory %s", df.dir)
 	}
@@ -98,7 +99,7 @@ func (df *DirFixture) createWithParent(t *testing.T, pf Fixture) {
 }
 
 // AddDirFixture adds a subdirectory fixture to this directory fixture.
-func (df *DirFixture) AddDirFixture(t *testing.T, name string, args *DirFixtureArgs) *DirFixture {
+func (df *DirFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
 	cf := newDirFixture(t, name, args)
 	cf.Parent = df
 	df.ChildFixtures = append(df.ChildFixtures, cf)
@@ -106,7 +107,7 @@ func (df *DirFixture) AddDirFixture(t *testing.T, name string, args *DirFixtureA
 }
 
 // AddRepoFixture adds a repository fixture to this directory fixture.
-func (df *DirFixture) AddRepoFixture(t *testing.T, name string, args *RepoFixtureArgs) *RepoFixture {
+func (df *DirFixture) AddRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
 	cf := newRepoFixture(t, name, args)
 	cf.Parent = df
 	df.ChildFixtures = append(df.ChildFixtures, cf)
@@ -114,7 +115,7 @@ func (df *DirFixture) AddRepoFixture(t *testing.T, name string, args *RepoFixtur
 }
 
 // AddFileFixture adds a file fixture to a dir fixture
-func (df *DirFixture) AddFileFixture(t *testing.T, name string, args *FileFixtureArgs) *FileFixture {
+func (df *DirFixture) AddFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
 	ff := newFileFixture(t, name, args)
 	ff.Parent = df
 	df.FileFixtures = append(df.FileFixtures, ff)
@@ -128,7 +129,9 @@ func (df *DirFixture) AddFileFixture(t *testing.T, name string, args *FileFixtur
 func (df *DirFixture) AddFileFixtures(t *testing.T, defaults *FileFixtureArgs, args ...any) {
 	for _, f := range args {
 		switch ffa := f.(type) {
-		case string:
+		case dt.Filename:
+			df.AddFileFixture(t, dt.RelFilepath(ffa), defaults)
+		case dt.RelFilepath:
 			df.AddFileFixture(t, ffa, defaults)
 		case *FileFixtureArgs:
 			if ffa.Name == "" {

@@ -3,8 +3,9 @@
 package fsfix
 
 import (
-	"os"
 	"testing"
+
+	"github.com/mikeschinkel/go-dt"
 )
 
 // _ is a compile-time check to ensure RootFixture implements the Fixture interface.
@@ -13,7 +14,7 @@ var _ Fixture = (*RootFixture)(nil)
 // RootFixture manages temporary directories and files for testing purposes.
 type RootFixture struct {
 	DirPrefix     string         // Prefix for temporary directory names
-	tempDir       string         // Path to the temporary directory
+	tempDir       dt.DirPath     // Path to the temporary directory
 	FileFixtures  []*FileFixture // File-level fixtures in the root temp directory
 	ChildFixtures []Fixture      // Project-level fixtures (directories with .git)
 	cleanupFunc   func()         // Function to clean up resources
@@ -21,7 +22,7 @@ type RootFixture struct {
 	t             *testing.T
 }
 
-func (rf *RootFixture) RelativePath() string {
+func (rf *RootFixture) RelativePath() dt.DirPath {
 	return "."
 }
 
@@ -33,7 +34,7 @@ func (rf *RootFixture) ensureCreated() {
 }
 
 // Dir returns the path to the temporary directory for this root fixture.
-func (rf *RootFixture) Dir() string {
+func (rf *RootFixture) Dir() dt.DirPath {
 	rf.ensureCreated()
 	return rf.tempDir
 }
@@ -50,13 +51,13 @@ func (rf *RootFixture) Create(t *testing.T) {
 
 	// Create temp directory (this can fail, so it belongs in Create)
 	var err error
-	rf.tempDir, err = os.MkdirTemp("", rf.DirPrefix+"-*")
+	rf.tempDir, err = dt.MkdirTemp("", rf.DirPrefix+"-*")
 	if err != nil {
 		t.Errorf("Failed to create temp directory using '%s'; %v", rf.DirPrefix+"-*", err)
 	}
 
 	rf.cleanupFunc = func() {
-		err := os.RemoveAll(rf.tempDir)
+		err := dt.RemoveAll(rf.tempDir)
 		if err != nil {
 			t.Errorf("Failed to remove temp directory '%s'; %v", rf.tempDir, err)
 		}
@@ -85,7 +86,7 @@ func NewRootFixture(dirPrefix string) *RootFixture {
 }
 
 // AddRepoFixture adds a project-level fixture (directory with .git) to the TestFixture.
-func (rf *RootFixture) AddRepoFixture(t *testing.T, name string, args *RepoFixtureArgs) *RepoFixture {
+func (rf *RootFixture) AddRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
 	pf := newRepoFixture(t, name, args)
 	pf.Parent = rf
 	rf.ChildFixtures = append(rf.ChildFixtures, pf)
@@ -93,7 +94,7 @@ func (rf *RootFixture) AddRepoFixture(t *testing.T, name string, args *RepoFixtu
 }
 
 // AddDirFixture adds a directory fixture (directory with optional .git) to the TestFixture.
-func (rf *RootFixture) AddDirFixture(t *testing.T, name string, args *DirFixtureArgs) *DirFixture {
+func (rf *RootFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
 	df := newDirFixture(t, name, args)
 	df.Parent = rf
 	rf.ChildFixtures = append(rf.ChildFixtures, df)
@@ -101,7 +102,7 @@ func (rf *RootFixture) AddDirFixture(t *testing.T, name string, args *DirFixture
 }
 
 // AddFileFixture adds a file fixture directly to the TestFixture temp directory
-func (rf *RootFixture) AddFileFixture(t *testing.T, name string, args *FileFixtureArgs) *FileFixture {
+func (rf *RootFixture) AddFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
 	ff := newFileFixture(t, name, args)
 	ff.Parent = rf
 	rf.FileFixtures = append(rf.FileFixtures, ff)
@@ -109,7 +110,7 @@ func (rf *RootFixture) AddFileFixture(t *testing.T, name string, args *FileFixtu
 }
 
 // TempDir returns the path to the temporary directory created for this fixture.
-func (rf *RootFixture) TempDir() string {
+func (rf *RootFixture) TempDir() dt.DirPath {
 	rf.ensureCreated()
 	return rf.tempDir
 }
@@ -134,7 +135,7 @@ func (rf *RootFixture) RemoveFiles(t *testing.T) {
 	if len(rf.tempDir) <= len("/tmp/x") {
 		goto end
 	}
-	err = os.RemoveAll(rf.tempDir)
+	err = dt.RemoveAll(rf.tempDir)
 	if err != nil {
 		t.Fatalf("failed to remove temporary files: %s", err.Error())
 	}

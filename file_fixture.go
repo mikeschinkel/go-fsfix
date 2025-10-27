@@ -4,15 +4,16 @@ package fsfix
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/mikeschinkel/go-dt"
 )
 
 // FileFixture represents a file fixture that can be created in test environments.
 type FileFixture struct {
-	Filepath       string
-	Name           string
+	Filepath       dt.Filepath
+	Name           dt.RelFilepath
 	Content        string
 	ContentFunc    ContentFunc
 	Permissions    int
@@ -28,7 +29,7 @@ type ContentFunc func(ff *FileFixture) string
 
 // FileFixtureArgs contains arguments for creating a FileFixture.
 type FileFixtureArgs struct {
-	Name           string
+	Name           dt.RelFilepath
 	Content        string
 	ContentFunc    ContentFunc
 	ModifiedTime   time.Time
@@ -39,7 +40,7 @@ type FileFixtureArgs struct {
 }
 
 // newFileFixture creates a new file fixture with the specified name and arguments.
-func newFileFixture(t *testing.T, name string, args *FileFixtureArgs) *FileFixture {
+func newFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
 	if args == nil {
 		args = &FileFixtureArgs{}
 	}
@@ -62,8 +63,8 @@ func newFileFixture(t *testing.T, name string, args *FileFixtureArgs) *FileFixtu
 	}
 }
 
-func (ff *FileFixture) RelativePath() string {
-	return filepath.Join(ff.Parent.RelativePath(), ff.Name)
+func (ff *FileFixture) RelativePath() dt.Filepath {
+	return dt.FilepathJoin(ff.Parent.RelativePath(), ff.Name)
 }
 
 // ensureCreated forces a failure if called before Create() is called.
@@ -79,7 +80,7 @@ func (ff *FileFixture) Create(t *testing.T, pf Fixture) {
 	t.Helper()
 	ff.created = true
 	ff.Parent = pf
-	ff.Filepath = filepath.Join(pf.Dir(), ff.Name)
+	ff.Filepath = dt.FilepathJoin(pf.Dir(), ff.Name)
 	ff.createFile(t)
 }
 
@@ -96,23 +97,23 @@ func (ff *FileFixture) createFile(t *testing.T) {
 		t.Errorf("File permissions not set for %s", ff.Filepath)
 	}
 
-	err = os.MkdirAll(filepath.Dir(ff.Filepath), os.FileMode(ff.DirPermissions))
+	err = dt.MkdirAll(dt.Dir(ff.Filepath), os.FileMode(ff.DirPermissions))
 	if err != nil {
-		t.Errorf("Failed to create test file directory %s", filepath.Dir(ff.Filepath))
+		t.Errorf("Failed to create test file directory %s", dt.Dir(ff.Filepath))
 	}
 
 	if ff.ContentFunc != nil {
 		ff.Content = ff.ContentFunc(ff)
 	}
 
-	err = os.WriteFile(ff.Filepath, []byte(ff.Content), os.FileMode(ff.Permissions))
+	err = dt.WriteFile(ff.Filepath, []byte(ff.Content), os.FileMode(ff.Permissions))
 	if err != nil {
 		t.Errorf("Failed to create test file %s", ff.Filepath)
 	}
 
 	// Set modification time if specified
 	if !ff.ModifiedTime.IsZero() {
-		err = os.Chtimes(ff.Filepath, ff.ModifiedTime, ff.ModifiedTime)
+		err = dt.ChangeFileTimes(ff.Filepath, ff.ModifiedTime, ff.ModifiedTime)
 		if err != nil {
 			t.Errorf("Failed to set modification time for %s", ff.Filepath)
 		}

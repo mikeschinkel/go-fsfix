@@ -4,11 +4,13 @@ package fsfix
 
 import (
 	"testing"
+
+	"github.com/mikeschinkel/go-dt"
 )
 
 // Fixture defines the interface for all test fixtures that can create directory structures.
 type Fixture interface {
-	Dir() string
-	RelativePath() string
+	Dir() dt.DirPath
+	RelativePath() dt.DirPath
 	createWithParent(*testing.T, Fixture)
 }
