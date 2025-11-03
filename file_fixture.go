@@ -97,9 +97,9 @@ func (ff *FileFixture) createFile(t *testing.T) {
 		t.Errorf("File permissions not set for %s", ff.Filepath)
 	}
 
-	err = dt.MkdirAll(dt.Dir(ff.Filepath), os.FileMode(ff.DirPermissions))
+	err = ff.Filepath.Dir().MkdirAll(os.FileMode(ff.DirPermissions))
 	if err != nil {
-		t.Errorf("Failed to create test file directory %s", dt.Dir(ff.Filepath))
+		t.Errorf("Failed to create test file directory %s", ff.Filepath.Dir())
 	}
 
 	if ff.ContentFunc != nil {

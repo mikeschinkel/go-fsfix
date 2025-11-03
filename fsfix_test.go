@@ -49,13 +49,13 @@ func main() {
 		t.Errorf("FileFixture.Filepath not set")
 	}
 
-	gotFP := dt.FileBase(ff.Filepath)
+	gotFP := ff.Filepath.Base()
 	wantFP := dt.Filename("main.go")
 	if gotFP != wantFP {
 		t.Errorf("FileFixture.Filepath not set to '%s'; got '%s' instead", wantFP, gotFP)
 	}
 
-	gotDP := dt.DirBase(dt.Dir(ff.Filepath))
+	gotDP := ff.Filepath.Dir().Base()
 	wantDP := dt.PathSegments("test-project")
 	if gotDP != wantDP {
 		t.Errorf("FileFixture.Filepath's parent dir not set to '%s'; got '%s' instead", wantDP, gotDP)

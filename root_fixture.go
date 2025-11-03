@@ -57,7 +57,7 @@ func (rf *RootFixture) Create(t *testing.T) {
 	}
 
 	rf.cleanupFunc = func() {
-		err := dt.RemoveAll(rf.tempDir)
+		err := rf.tempDir.RemoveAll()
 		if err != nil {
 			t.Errorf("Failed to remove temp directory '%s'; %v", rf.tempDir, err)
 		}
@@ -135,7 +135,7 @@ func (rf *RootFixture) RemoveFiles(t *testing.T) {
 	if len(rf.tempDir) <= len("/tmp/x") {
 		goto end
 	}
-	err = dt.RemoveAll(rf.tempDir)
+	err = rf.tempDir.RemoveAll()
 	if err != nil {
 		t.Fatalf("failed to remove temporary files: %s", err.Error())
 	}
