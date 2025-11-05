@@ -7,6 +7,6 @@ replace (
 	github.com/mikeschinkel/go-dt/de => ../go-dt/de
 )
 
-require github.com/mikeschinkel/go-dt v0.0.0-20251103071339-3bc3e3719d7e
+require github.com/mikeschinkel/go-dt v0.0.0-20251103083857-4c80f1a95372
 
-require github.com/mikeschinkel/go-dt/de v0.0.0-00010101000000-000000000000 // indirect
+require github.com/mikeschinkel/go-dt/de v0.0.0-20251103083857-4c80f1a95372 // indirect
