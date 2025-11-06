@@ -87,15 +87,14 @@ func NewRootFixture(dirPrefix string) *RootFixture {
 
 // AddRepoFixture adds a project-level fixture (directory with .git) to the TestFixture.
 func (rf *RootFixture) AddRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
-	pf := newRepoFixture(t, name, args)
-	pf.Parent = rf
+	pf := newRepoFixture(t, name, rf, args)
 	rf.ChildFixtures = append(rf.ChildFixtures, pf)
 	return pf
 }
 
 // AddDirFixture adds a directory fixture (directory with optional .git) to the TestFixture.
 func (rf *RootFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
-	df := newDirFixture(t, name, args)
+	df := newDirFixture(t, name, rf, args)
 	df.Parent = rf
 	rf.ChildFixtures = append(rf.ChildFixtures, df)
 	return df
@@ -103,8 +102,7 @@ func (rf *RootFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *D
 
 // AddFileFixture adds a file fixture directly to the TestFixture temp directory
 func (rf *RootFixture) AddFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
-	ff := newFileFixture(t, name, args)
-	ff.Parent = rf
+	ff := newFileFixture(t, name, rf, args)
 	rf.FileFixtures = append(rf.FileFixtures, ff)
 	return ff
 }

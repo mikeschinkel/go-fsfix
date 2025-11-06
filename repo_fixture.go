@@ -16,6 +16,7 @@ var _ Fixture = (*RepoFixture)(nil)
 type RepoFixture struct {
 	*DirFixture
 	created bool
+	Parent  Fixture
 	t       *testing.T
 }
 
@@ -24,25 +25,25 @@ type RepoFixtureArgs struct {
 	Files        []*FileFixture // Files to create within this project
 	Permissions  int            // Directory permissions
 	ModifiedTime time.Time      // Modification time for the directory
-	Parent       Fixture        // Parent test fixture
 }
 
 // newRepoFixture creates a new repository fixture with the specified name and arguments.
-func newRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
+func newRepoFixture(t *testing.T, name dt.PathSegments, parent Fixture, args *RepoFixtureArgs) (rf *RepoFixture) {
 	if args == nil {
 		args = &RepoFixtureArgs{}
 	}
 	if args.Permissions == 0 {
 		args.Permissions = 0755
 	}
-	return &RepoFixture{
-		t: t,
-		DirFixture: newDirFixture(t, name, &DirFixtureArgs{
-			ModifiedTime: args.ModifiedTime,
-			Permissions:  args.Permissions,
-			Parent:       args.Parent,
-		}),
+	rf = &RepoFixture{
+		t:      t,
+		Parent: parent, // TODO: Repo being parent of Dir might cause issues when compsing directories; need to test for that
 	}
+	rf.DirFixture = newDirFixture(t, name, rf, &DirFixtureArgs{
+		ModifiedTime: args.ModifiedTime,
+		Permissions:  args.Permissions,
+	})
+	return rf
 }
 
 func (rf *RepoFixture) RelativePath() dt.DirPath {
@@ -88,24 +89,21 @@ func (rf *RepoFixture) MakeDir(fp string) dt.DirPath {
 
 // AddRepoFixture adds a sub-repository fixture to this repository fixture.
 func (rf *RepoFixture) AddRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
-	child := newRepoFixture(t, name, args)
-	child.Parent = rf
+	child := newRepoFixture(t, name, rf, args)
 	rf.ChildFixtures = append(rf.ChildFixtures, child)
 	return child
 }
 
 // AddDirFixture adds a directory fixture to this repository fixture.
 func (rf *RepoFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
-	child := newDirFixture(t, name, args)
-	child.Parent = rf
+	child := newDirFixture(t, name, rf, args)
 	rf.ChildFixtures = append(rf.ChildFixtures, child)
 	return child
 }
 
 // AddFileFixture adds a file fixture to a project fixture
 func (rf *RepoFixture) AddFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
-	child := newFileFixture(t, name, args)
-	child.Parent = rf
+	child := newFileFixture(t, name, rf, args)
 	rf.FileFixtures = append(rf.FileFixtures, child)
 	return child
 }

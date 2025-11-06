@@ -36,11 +36,10 @@ type FileFixtureArgs struct {
 	Permissions    int
 	DirPermissions int
 	DoNotCreate    bool
-	Parent         Fixture
 }
 
 // newFileFixture creates a new file fixture with the specified name and arguments.
-func newFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
+func newFileFixture(t *testing.T, name dt.RelFilepath, parent Fixture, args *FileFixtureArgs) *FileFixture {
 	if args == nil {
 		args = &FileFixtureArgs{}
 	}
@@ -52,13 +51,13 @@ func newFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *F
 	}
 	return &FileFixture{
 		Name:           name,
+		Parent:         parent,
 		Content:        args.Content,
 		ContentFunc:    args.ContentFunc,
 		Permissions:    args.Permissions,
 		DirPermissions: args.DirPermissions,
 		ModifiedTime:   args.ModifiedTime,
 		DoNotCreate:    args.DoNotCreate,
-		Parent:         args.Parent,
 		t:              t,
 	}
 }

@@ -49,11 +49,10 @@ type DirFixtureArgs struct {
 	Files        []*FileFixture // Files to create within this dir
 	Permissions  int            // Directory permissions
 	ModifiedTime time.Time      // Modification time for the directory
-	Parent       Fixture        // Parent test fixture
 }
 
 // newDirFixture creates a new directory fixture with the specified name and arguments.
-func newDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
+func newDirFixture(t *testing.T, name dt.PathSegments, parent Fixture, args *DirFixtureArgs) *DirFixture {
 	if args == nil {
 		args = &DirFixtureArgs{}
 	}
@@ -62,7 +61,7 @@ func newDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *Di
 	}
 	return &DirFixture{
 		Name:         name,
-		Parent:       args.Parent,
+		Parent:       parent,
 		FileFixtures: args.Files,
 		ModifiedTime: args.ModifiedTime,
 		Permissions:  args.Permissions,
@@ -100,24 +99,21 @@ func (df *DirFixture) createWithParent(t *testing.T, pf Fixture) {
 
 // AddDirFixture adds a subdirectory fixture to this directory fixture.
 func (df *DirFixture) AddDirFixture(t *testing.T, name dt.PathSegments, args *DirFixtureArgs) *DirFixture {
-	cf := newDirFixture(t, name, args)
-	cf.Parent = df
+	cf := newDirFixture(t, name, df, args)
 	df.ChildFixtures = append(df.ChildFixtures, cf)
 	return cf
 }
 
 // AddRepoFixture adds a repository fixture to this directory fixture.
 func (df *DirFixture) AddRepoFixture(t *testing.T, name dt.PathSegments, args *RepoFixtureArgs) *RepoFixture {
-	cf := newRepoFixture(t, name, args)
-	cf.Parent = df
+	cf := newRepoFixture(t, name, df, args)
 	df.ChildFixtures = append(df.ChildFixtures, cf)
 	return cf
 }
 
 // AddFileFixture adds a file fixture to a dir fixture
 func (df *DirFixture) AddFileFixture(t *testing.T, name dt.RelFilepath, args *FileFixtureArgs) *FileFixture {
-	ff := newFileFixture(t, name, args)
-	ff.Parent = df
+	ff := newFileFixture(t, name, df, args)
 	df.FileFixtures = append(df.FileFixtures, ff)
 	return ff
 }
