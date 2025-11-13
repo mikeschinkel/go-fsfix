@@ -56,7 +56,7 @@ func main() {
 	}
 
 	gotDP := ff.Filepath.Dir().Base()
-	wantDP := dt.PathSegments("test-project")
+	wantDP := dt.PathSegment("test-project")
 	if gotDP != wantDP {
 		t.Errorf("FileFixture.Filepath's parent dir not set to '%s'; got '%s' instead", wantDP, gotDP)
 	}
