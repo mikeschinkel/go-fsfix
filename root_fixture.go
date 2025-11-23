@@ -3,6 +3,7 @@
 package fsfix
 
 import (
+	"os"
 	"testing"
 
 	"github.com/mikeschinkel/go-dt"
@@ -122,20 +123,71 @@ func (rf *RootFixture) Cleanup() {
 // RemoveFiles safely removes the temporary directory and all its contents.
 func (rf *RootFixture) RemoveFiles(t *testing.T) {
 	var err error
+	var tempDir, rootDir, tmpRoot dt.DirPath
+	var rel dt.PathSegments
+
 	t.Helper()
 	rf.ensureCreated()
+
 	if rf.tempDir == "" {
 		goto end
 	}
-	if rf.tempDir == "/" {
+
+	// Normalize to a clean path using DirPath helpers.
+	tempDir = rf.tempDir.Clean()
+
+	// Require an absolute path; never delete relative dirs.
+	if !tempDir.IsAbs() {
 		goto end
 	}
-	if len(rf.tempDir) <= len("/tmp/x") {
+
+	// Compute filesystem rootDir for this path.
+	// On Unix: VolumeName() == "", so rootDir is "/".
+	// On Windows: VolumeName() == "C:", so rootDir is "C:\".
+	rootDir = dt.DirPath(tempDir.VolumeName() + dt.VolumeName(os.PathSeparator))
+
+	if tempDir == rootDir {
+		// Never delete a filesystem rootDir.
 		goto end
 	}
+
+	// Work out the OS temp directory as a DirPath.
+	tmpRoot = dt.TempDir().Clean()
+
+	// Never delete the entire temp rootDir either.
+	if tempDir == tmpRoot {
+		goto end
+	}
+
+	// Ensure tempDir is *inside* tmpRoot (not a sibling/parent).
+	// Adjust the type of rel / conversion if your Rel() returns a DirPath
+	// or some other type.
+	rel, err = tempDir.Rel(tmpRoot)
+	if err != nil {
+		// If we can't reason about the relationship, do nothing.
+		goto end
+	}
+
+	if rel == "." {
+		// tempDir == tmpRoot (already guarded above, but belt-and-suspenders).
+		goto end
+	}
+
+	if rel.HasDotDotPrefix() {
+		// tempDir is outside tmpRoot; refuse to delete.
+		goto end
+	}
+
+	// At this point tempDir is:
+	// - absolute,
+	// - not a filesystem rootDir,
+	// - not the temp rootDir,
+	// - and is located *under* the temp rootDir.
+	// It's safe to remove.
 	err = rf.tempDir.RemoveAll()
 	if err != nil {
-		t.Fatalf("failed to remove temporary files: %s", err.Error())
+		t.Fatalf("failed to remove temporary files %q: %v", tempDir, err)
 	}
+
 end:
 }
