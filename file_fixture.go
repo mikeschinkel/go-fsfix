@@ -66,14 +66,6 @@ func (ff *FileFixture) RelativePath() dt.Filepath {
 	return dt.FilepathJoin(ff.Parent.RelativePath(), ff.Name)
 }
 
-// ensureCreated forces a failure if called before Create() is called.
-func (ff *FileFixture) ensureCreated() {
-	ff.t.Helper()
-	if !ff.created {
-		ff.t.Fatalf("FileFixture '%s' has not yet been created", ff.Name)
-	}
-}
-
 // Create creates the file within the specified parent fixture's directory.
 func (ff *FileFixture) Create(t *testing.T, pf Fixture) {
 	t.Helper()
