@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"testing"
 
 	"github.com/mikeschinkel/go-fsfix"
 )
@@ -10,25 +11,27 @@ import (
 // Example demonstrating basic usage of go-fsfix for creating test file structures
 func main() {
 	fmt.Println("go-fsfix Basic Usage Example")
-	fmt.Println("=============================\n")
+	fmt.Printf("=============================%s", "\n\n")
 
 	// Create a root fixture with a descriptive prefix
 	tf := fsfix.NewRootFixture("example-project")
 	defer tf.Cleanup()
 
+	t := &testing.T{}
+
 	// Add a simple file directly to the root
-	configFile := tf.AddFileFixture(nil, "config.json", &fsfix.FileFixtureArgs{
+	configFile := tf.AddFileFixture(t, "config.json", &fsfix.FileFixtureArgs{
 		Content: `{"app": "example", "version": "1.0"}`,
 	})
 
 	// Add a repository-like structure
-	repoFixture := tf.AddRepoFixture(nil, "myapp", nil)
+	repoFixture := tf.AddRepoFixture(t, "myapp", nil)
 
 	// Add a directory within the repo
-	srcDir := repoFixture.AddDirFixture(nil, "src", nil)
+	srcDir := repoFixture.AddDirFixture(t, "src", nil)
 
 	// Add files to the src directory
-	mainFile := srcDir.AddFileFixture(nil, "main.go", &fsfix.FileFixtureArgs{
+	mainFile := srcDir.AddFileFixture(t, "main.go", &fsfix.FileFixtureArgs{
 		Content: `package main
 
 func main() {
@@ -36,7 +39,7 @@ func main() {
 }`,
 	})
 
-	utilFile := srcDir.AddFileFixture(nil, "util.go", &fsfix.FileFixtureArgs{
+	utilFile := srcDir.AddFileFixture(t, "util.go", &fsfix.FileFixtureArgs{
 		Content: `package main
 
 func helper() string {
@@ -45,8 +48,8 @@ func helper() string {
 	})
 
 	// Add a test directory
-	testDir := repoFixture.AddDirFixture(nil, "test", nil)
-	testDir.AddFileFixture(nil, "main_test.go", &fsfix.FileFixtureArgs{
+	testDir := repoFixture.AddDirFixture(t, "test", nil)
+	testDir.AddFileFixture(t, "main_test.go", &fsfix.FileFixtureArgs{
 		Content: `package main
 
 import "testing"
@@ -57,7 +60,7 @@ func TestExample(t *testing.T) {
 	})
 
 	// Create all the fixtures (actually write files to disk)
-	tf.Create(nil)
+	tf.Create(t)
 
 	// Display the created structure
 	fmt.Println("Created temporary test structure:")
