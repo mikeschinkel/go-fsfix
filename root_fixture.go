@@ -173,7 +173,7 @@ func (rf *RootFixture) RemoveFiles(t *testing.T) {
 		goto end
 	}
 
-	if rel.HasDotDotPrefix() {
+	if dt.EntryPath(rel).HasDotDotPrefix() {
 		// tempDir is outside tmpRoot; refuse to delete.
 		goto end
 	}
