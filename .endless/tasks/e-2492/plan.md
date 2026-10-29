@@ -1,0 +1,1 @@
+In .github/workflows/release.yml, add `':(exclude).endless'` to the pathspec of each `git log` that builds the release notes' commit list, as go-dt's release.yml does. Check with `git log <prev-tag>..HEAD --oneline -- . ':(exclude).endless'` that the Endless commits drop out.
