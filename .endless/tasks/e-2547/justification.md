@@ -1,0 +1,1 @@
+Mike chose on 2026-11-02 to make go-fsfix broadly reusable rather than hand-roll repo fixtures in gomion; the fixture design is his call
