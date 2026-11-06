@@ -11,3 +11,9 @@ statement = "release.yml's generated release notes leave out commits that change
 id = "P2"
 kind = "exclusion"
 statement = "Does not otherwise change release.yml or test.yml; E-2472 replaces both with gomion's generated workflows"
+
+[[item]]
+id = "P3"
+kind = "deliverable"
+statement = ".gitignore lists go.work and go.work.sum"
+verify = "git check-ignore go.work go.work.sum"
