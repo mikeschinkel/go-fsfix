@@ -21,10 +21,10 @@
     const (
         DefaultBranch        = "main"
         DefaultCommitMessage = "fsfix: initial commit"
-        DefaultAuthorName    = "go-fsfix"
+        DefaultAuthorName    dt.EmailDisplayName = "go-fsfix"
         DefaultAuthorEmail   dt.EmailAddress = "fsfix@example.com"
     )
-    var DefaultAuthor = dt.NewMailbox(DefaultAuthorName, DefaultAuthorEmail)
+    var DefaultAuthor = dt.Mailbox{DisplayName: DefaultAuthorName, Email: DefaultAuthorEmail}  // go-dt has no NewMailbox (E-2567)
 
 ## Repo accessor
 - RepoFixture keeps the *gitutil.Repo it used and returns it from `Repo()`, guarded by ensureCreated. go-gitutil is already in the consumer's build, so the accessor adds no dependency.
