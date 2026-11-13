@@ -19,3 +19,4 @@ Rationale and rejected alternatives are in the analysis. This is how.
 - `test/`: new tests per item, verifying through go-gitutil's read side; no test execs git.
 - `README.md`: real-repo section, Create versus Reconcile versus recreate, the defaults and isolation, and drop the "simulate" wording.
 - `.gitignore`: the Endless per-checkout entries.
+- Every fixture constructor (newRepoFixture, newDirFixture, newFileFixture, and the new clone and worktree ones) copies its args before filling defaults.
