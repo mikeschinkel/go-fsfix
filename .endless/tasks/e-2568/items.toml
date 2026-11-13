@@ -140,3 +140,9 @@ statement = "Does not integrate go-cfgstore"
 id = "P25"
 kind = "exclusion"
 statement = "Does not restore git state in place (no reset or checkout); a clean git state comes from recreating the fixture"
+
+[[item]]
+id = "P26"
+kind = "deliverable"
+statement = "No Add* method or fixture constructor modifies the caller's *Args struct; defaults are filled into a copy"
+verify = "test/ module: pass one args value with zero fields to two Add* calls; the struct still has zero fields afterwards"
