@@ -32,7 +32,7 @@
 - RepoFixture keeps the *gitutil.Repo it used and returns it from `Repo()`, guarded by ensureCreated. go-gitutil is already in the consumer's build, so the accessor adds no dependency.
 
 ## AddClone and AddWorktree
-- `origin.AddClone(t, name, args) *RepoFixture`: a clone is a sibling of the origin on disk (a clone inside the working tree would be an embedded repo). Implementation appends the clone to the origin's parent's ChildFixtures; since children create in order and the origin was added first, the clone runs after the origin's commit with no special ordering code.
+- `origin.AddClone(t, name, &CloneFixtureArgs{...}) *CloneFixture`: CloneFixture embeds *RepoFixture, so a clone gets RepoFixture's methods and every *Args type stays named after the fixture type it builds (Mike's choice over AddCloneArgs, which would follow go-gitutil's verb-named style but split go-fsfix's convention). A clone is a sibling of the origin on disk (a clone inside the working tree would be an embedded repo). Implementation appends the clone to the origin's parent's ChildFixtures; since children create in order and the origin was added first, the clone runs after the origin's commit with no special ordering code.
 - `repo.AddWorktree(t, name, &WorktreeFixtureArgs{Branch}) *WorktreeFixture`: same sibling placement; a linked worktree has a `.git` file rather than a directory, so it is its own small type.
 - Both delegate to go-gitutil's clone and worktree-add.
 
@@ -76,11 +76,11 @@
 - Mike: "If no, then B definitely." So a test needing a clean git state calls Cleanup and then Create again (a new temp directory, a fresh repo), or builds a fixture per iteration. Recreation restores everything (branches, tags, worktrees, untracked files), which reset and checkout would not, and go-gitutil needs no reset or checkout for fixtures.
 
 ## Branch type is dt.GitBranchName (Mike)
-- go-gitutil's GitRef is used where git means a revision, broader than a branch name (`HEAD~1`, `refs/tags/v1`). Mike asked for git's concepts to be fully modelled and reused across packages, in go-dt's root package, each name prefixed with Git: E-2599 (GitRefName, GitBranchName, GitTagName, GitRemoteName, GitRevision, GitObjectID). A second domain-types package was rejected because developers would have to discover it and choose between it and go-dt.
+- go-gitutil's GitRef is used where git means a revision, broader than a branch name (`HEAD~1`, `refs/tags/v1`). Mike asked for git's concepts to be fully modelled and reused across packages, in go-dt's root package, each name prefixed with Git: E-2599 (GitRef, GitBranchName, GitTagName, GitRemoteName, GitRevision, GitObjectID). Name is dropped only from GitRef, since a ref already is a name; a branch, an annotated tag and a remote are each more than their name. A second domain-types package was rejected because developers would have to discover it and choose between it and go-dt.
 - WorktreeFixtureArgs.Branch and CloneFixtureArgs.Branch use the same type.
 
 ## Decided without asking (Mike could object; none did)
-- `AddClone` takes its own `CloneFixtureArgs` (Branch to check out, Permissions, ModifiedTime). RepoFixtureArgs' Files, Message, Author, Committer and CommitTime mean nothing for a clone.
+- `AddClone` takes its own `CloneFixtureArgs` and returns a `*CloneFixture` (Branch to check out, Permissions, ModifiedTime). RepoFixtureArgs' Files, Message, Author, Committer and CommitTime mean nothing for a clone.
 - A missing git binary fails the test (`t.Fatal`), never skips it; a skipped suite can pass while testing nothing. Mike confirmed (Q7: A).
 - A worktree's branch defaults to the fixture's name, matching `git worktree add <path>`.
 - A git failure during Create calls `t.Fatal`: later steps depend on it.
