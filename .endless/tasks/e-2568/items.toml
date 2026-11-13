@@ -70,7 +70,7 @@ verify = "test/ module: the outer repo's tree has a gitlink entry for the inner 
 [[item]]
 id = "P12"
 kind = "deliverable"
-statement = "RepoFixture.AddClone(t, name, *CloneFixtureArgs) returns a *RepoFixture that, after Create, is a clone of the origin placed beside it on disk"
+statement = "RepoFixture.AddClone(t, name, *CloneFixtureArgs) returns a *CloneFixture, embedding *RepoFixture, that after Create is a clone of the origin placed beside it on disk"
 detail = "CloneFixtureArgs has Branch (dt.GitBranchName, the branch to check out), Permissions and ModifiedTime"
 
 [[item]]
