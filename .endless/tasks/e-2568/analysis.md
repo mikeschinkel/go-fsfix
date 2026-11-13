@@ -86,3 +86,7 @@
 - A git failure during Create calls `t.Fatal`: later steps depend on it.
 - Author and Committer stay separate; git sets both through environment variables or the `author.*`/`committer.*` config keys.
 - Items state behaviour; go-gitutil's call names come from E-2600.
+
+## Args stay pointers; constructors stop writing into them (Mike: A plus the fix)
+- Every Add* method takes `*…FixtureArgs`, matching the existing three, so callers may pass nil. Nil and an empty struct mean the same, since every zero field means its default.
+- Today newRepoFixture and newDirFixture write defaults (Permissions = 0755) back into the caller's struct, so a test reusing one args value sees it changed. Constructors now copy the args before filling defaults. This fixes the existing three without breaking callers; switching all five to values was rejected because it breaks every caller passing nil or &…Args{}.
