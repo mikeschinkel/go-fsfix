@@ -90,3 +90,15 @@
 ## Args stay pointers; constructors stop writing into them (Mike: A plus the fix)
 - Every Add* method takes `*…FixtureArgs`, matching the existing three, so callers may pass nil. Nil and an empty struct mean the same, since every zero field means its default.
 - Today newRepoFixture and newDirFixture write defaults (Permissions = 0755) back into the caller's struct, so a test reusing one args value sees it changed. Constructors now copy the args before filling defaults. This fixes the existing three without breaking callers; switching all five to values was rejected because it breaks every caller passing nil or &…Args{}.
+
+# Decided while re-checking upstream (2026-11-15, with Mike)
+
+## Fixture git runs in go-gitutil's Strict mode; go-binaries finds git (Mike: C)
+- go-gitutil offers two ways to keep the machine's config out: `RepoArgs.Env` (entries added on top of the process environment) and `RepoArgs.Strict` (each git process gets an environment built from nothing: an empty HOME, GIT_CONFIG_GLOBAL=/dev/null, GIT_CONFIG_NOSYSTEM=1, local remotes only, user.useConfigOnly=true). Strict passes no PATH, so it needs `RepoArgs.GitPath`.
+- Env lets every GIT_* variable of the caller reach fixture git: `go test` started from a git hook inherits GIT_DIR and GIT_INDEX_FILE, which point fixture git at the outer repository. Strict blocks that.
+- Rejected: Env mode (the leak); go-fsfix calling exec.LookPath itself (breaks P9's no-os/exec check and duplicates go-gitutil's own test helper). Finding executables belongs to go-binaries (E-2616), which E-2568 now waits for.
+
+## Upstream gaps found and placed (not worked around here)
+- go-gitutil's `Add` does not set advice.addEmbeddedRepo=false, which E-2547 expected; go-gitutil keeps a `FindNestedModules` that go-goutil now owns. Both folded into go-gitutil E-2624 (ED-1550 rule 2), which now blocks E-2568 and E-2529.
+- P21 needs go-gitutil published; go-gitutil has never been pushed. E-2529 covers that and now blocks E-2568.
+- go-gitutil's E-2602 (its tests on go-fsfix fixtures) follows go-fsfix's release: go-gitutil root tag, then go-fsfix tag, then E-2602.
