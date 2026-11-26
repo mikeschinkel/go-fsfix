@@ -17,3 +17,8 @@ id = "P3"
 kind = "deliverable"
 statement = ".gitignore lists go.work and go.work.sum"
 verify = "git check-ignore go.work go.work.sum"
+
+[[item]]
+id = "P4"
+kind = "deliverable"
+statement = "Every go.mod in go-fsfix says go 1.27.0, and test.yml and release.yml set up Go 1.27 with no GOEXPERIMENT (the go-pkgs package baseline, which the hand-maintained workflows carry until E-2472 lands)"
