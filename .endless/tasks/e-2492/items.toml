@@ -27,3 +27,8 @@ statement = "Every go.mod in go-fsfix says go 1.27.0, and test.yml and release.y
 id = "P5"
 kind = "deliverable"
 statement = "golangci-lint is pinned at v2.15.0 in the Makefile and test.yml, and GOEXPERIMENT is gone from the Makefile and test/infinite-fuzz.sh as well as the workflows (go-pkgs baseline)"
+
+[[item]]
+id = "P6"
+kind = "deliverable"
+statement = ".gitignore lists Endless's per-checkout files (.endless/worktrees/, tmp/, logs/, worktree.json, worktree.lock) (go-pkgs baseline)"
