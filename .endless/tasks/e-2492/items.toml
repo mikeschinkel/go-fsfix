@@ -32,3 +32,8 @@ statement = "golangci-lint is pinned at v2.15.0 in the Makefile and test.yml, an
 id = "P6"
 kind = "deliverable"
 statement = ".gitignore lists Endless's per-checkout files (.endless/worktrees/, tmp/, logs/, worktree.json, worktree.lock) (go-pkgs baseline)"
+
+[[item]]
+id = "P7"
+kind = "deliverable"
+statement = "examples/basic_usage/go.sum and test/go.mod are tidy, so the example builds with GOWORK=off (its go.sum lacked go-dt v0.3.3)"
