@@ -1,3 +1,10 @@
 .DS_Store
 bin
 bin/**
+
+# endless (managed by `endless project init`)
+.endless/worktrees/
+.endless/tmp/
+.endless/logs/
+.endless/worktree.json
+.endless/worktree.lock

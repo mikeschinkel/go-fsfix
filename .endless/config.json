@@ -1,0 +1,12 @@
+{
+  "name": "go-fsfix",
+  "label": "Go FSFix",
+  "description": "File-system Fixtures for testing Go code",
+  "language": "go",
+  "status": "active",
+  "dependencies": [],
+  "documents": {
+    "rules": []
+  },
+  "identity": "bceccdd8ef4d92fbd227f3d234c929e1c66f2462"
+}
