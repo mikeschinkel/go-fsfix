@@ -1,0 +1,133 @@
+{
+  "reportFormat": "CTRF",
+  "specVersion": "0.2.0",
+  "results": {
+    "tool": {
+      "name": "endless"
+    },
+    "summary": {
+      "tests": 14,
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "pending": 0,
+      "other": 0,
+      "start": 1795685579215,
+      "stop": 1795685600776
+    },
+    "tests": [
+      {
+        "name": "go.mod is tidy without go.work",
+        "status": "passed",
+        "duration": 0,
+        "labels": {
+          "check": "go.mod is tidy without go.work"
+        }
+      },
+      {
+        "name": "go.mod is tidy without go.work (examples/basic_usage)",
+        "status": "passed",
+        "duration": 0,
+        "labels": {
+          "check": "go.mod is tidy without go.work (examples/basic_usage)"
+        }
+      },
+      {
+        "name": "go.mod is tidy without go.work (test)",
+        "status": "passed",
+        "duration": 0,
+        "labels": {
+          "check": "go.mod is tidy without go.work (test)"
+        }
+      },
+      {
+        "name": "test module tests pass with GOWORK=off",
+        "status": "passed",
+        "duration": 4154,
+        "labels": {
+          "check": "test module tests pass with GOWORK=off"
+        }
+      },
+      {
+        "name": "root and example modules build and vet under Go 1.27 with GOWORK=off",
+        "status": "passed",
+        "duration": 5085,
+        "labels": {
+          "check": "root and example modules build and vet under Go 1.27 with GOWORK=off"
+        }
+      },
+      {
+        "name": "every module is tidy",
+        "status": "passed",
+        "duration": 79,
+        "labels": {
+          "check": "every module is tidy"
+        }
+      },
+      {
+        "name": "P1: release.yml's commit list excludes .endless/ with a git log pathspec",
+        "status": "passed",
+        "duration": 6,
+        "labels": {
+          "check": "P1: release.yml's commit list excludes .endless/ with a git log pathspec"
+        }
+      },
+      {
+        "name": "P1: the pathspec drops commits that touch only .endless/ (none of v0.2.2..main's survivors is .endless-only)",
+        "status": "passed",
+        "duration": 225,
+        "labels": {
+          "check": "P1: the pathspec drops commits that touch only .endless/ (none of v0.2.2..main's survivors is .endless-only)"
+        }
+      },
+      {
+        "name": "P1: the pathspec leaves out Endless commits that plain git log lists",
+        "status": "passed",
+        "duration": 54,
+        "labels": {
+          "check": "P1: the pathspec leaves out Endless commits that plain git log lists"
+        }
+      },
+      {
+        "name": "P3: .gitignore lists go.work and go.work.sum",
+        "status": "passed",
+        "duration": 12,
+        "labels": {
+          "check": "P3: .gitignore lists go.work and go.work.sum"
+        }
+      },
+      {
+        "name": "P4: every go.mod says go 1.27.0",
+        "status": "passed",
+        "duration": 5,
+        "labels": {
+          "check": "P4: every go.mod says go 1.27.0"
+        }
+      },
+      {
+        "name": "P4: test.yml and release.yml set up Go 1.27",
+        "status": "passed",
+        "duration": 5,
+        "labels": {
+          "check": "P4: test.yml and release.yml set up Go 1.27"
+        }
+      },
+      {
+        "name": "P4: no GOEXPERIMENT remains outside .endless/",
+        "status": "passed",
+        "duration": 22,
+        "labels": {
+          "check": "P4: no GOEXPERIMENT remains outside .endless/"
+        }
+      },
+      {
+        "name": "baseline: golangci-lint v2.15.0 is pinned and lints the root and test modules clean",
+        "status": "passed",
+        "duration": 11909,
+        "labels": {
+          "check": "baseline: golangci-lint v2.15.0 is pinned and lints the root and test modules clean"
+        }
+      }
+    ]
+  }
+}
