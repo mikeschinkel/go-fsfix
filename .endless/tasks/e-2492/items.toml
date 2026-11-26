@@ -10,7 +10,7 @@ statement = "release.yml's generated release notes leave out commits that change
 [[item]]
 id = "P2"
 kind = "exclusion"
-statement = "Does not otherwise change release.yml or test.yml; E-2472 replaces both with gomion's generated workflows"
+statement = "Does not switch go-fsfix to gomion's generated workflows; E-2472 replaces test.yml and release.yml with them once gomion repo setup works"
 
 [[item]]
 id = "P3"
